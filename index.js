@@ -50,93 +50,93 @@ function setQuestions(){                         // Function used to set the que
 
 function playFlashCards(){
     console.log("You are studying your flash cards. Now you will ace this test.");
+    if(questionsArr.length > 0){
+        console.log(questionsArr.length);
+        console.log("Game continues");
+        // console.log(numRounds);
+        theCard = pickCard();
+        console.log(theCard.front);
+        console.log(theCard.back);
+        // console.log("Your Question is " + JSON.stringify(theCard, null, 2));
+        inquire.prompt([
+            {
+                type: "input",
+                message: theCard.front,
+                name: "answer"
+            }
+            ]).then(function(response){
+                var guess = String(response.answer);
+                var correct = String(theCard.back);
+                console.log("You guessed " + guess);
+                console.log("You should have guessed " +theCard.back)
+                if (guess.toLowerCase === correct.toLowerCase){
+                    console.log("Correct");
+                    score++;
+                } else {
+                    console.log("Wrong");
+                }
+                // recursion of function
+                playFlashCards();
+            });// end inquire.prompt.then()
+    }else{
+        console.log("Game is Over");
+        console.log("Congradulations, out of " + rounds + ", you got " + score + " correct.")
+    }// end if/else()
 }
 function gameChoice(){
     score = 0;
-    rounds = questionsArr.length;
-    console.log("there is " + rounds + " Rounds")
     inquire.prompt([
         {
-            type: "list",
-            message: "Are you over 21?",
-            choices: ["Yes", "No"],
-            name: "adult"
+            type:"list",
+            message: "Grab a drink, and let's study. What do you want to do?",
+            choices: ["Study Flash Cards", "Create New Cards"],
+            name: "game"
         }// end prompt()
     ]).then(function(response){
-        var ra = response.adult;
-        console.log(ra);
-        if(ra === "Yes"){
-            console.log("You are consenting that you are over 21. You may even not be but honestly, who cares! Have fun and study hard!");
+        var rg = response.game;
+        console.log(rg);
+        if(rg === "Study Flash Cards"){
+            playFlashCards();
+        } else if(rg === "Create New Cards"){
+            console.log("Let's make a new card");
             inquire.prompt([
                 {
-                    type:"list",
-                    message: "Grab a drink, and let's study. What do you want to do?",
-                    choices: ["Study Flash Cards", "Create New Cards", "Save Cards"],
-                    name: "game"
-                }// end prompt()
+                    type: "input",
+                    message: "What is your question?",
+                    name: "front"
+                }
             ]).then(function(response){
-                var rg = response.game;
-                console.log(rg);
-                if(rg === "Study Flash Cards"){
-                    playFlashCards();
-                } else if(rg === "Create New Cards"){
-                    console.log("Let's make a new card");
-                    inquire.prompt([
-                        {
-                            type: "input",
-                            message: "What is your question?",
-                            name: "front"
-                        }
-                    ]).then(function(response){
-                        front = response.front;
-                        console.log("You just submitted this front: \n" + front);
-                        inquire.prompt([
-                            {
-                                type: "input",
-                                message: "What is answer to your question?",
-                                name: "back"
-                            }
-                        ]).then(function(input){
-                            var back = input.back;
-                            // console.log("back is " + back);
-                            // console.log("You just submitted this back: \n" + back);
-                            var newCard = new Card(front, back);
-                            questionsArr.push(newCard);
-                            setQuestions();
-                        });// end answer inquire.prompt.then()
-                    });// end question inquire.prompt.then()
-                } else if(rg === "Save Cards"){
-                    console.log("Saving your cards to your library!");
-                    setQuestions();
-                }else{
-                    console.log("I have no idea how you got here!");
-                }// end else if()
-            }); // end .then()
-        } else if(ra === "No") {
-            console.log("Lame, you admitted that are under 21. There was no way for me to validate that.");
-            inquire.prompt([
-                {
-                    type:"list",
-                    message: "Since you are under age, which game do you want to play?",
-                    choices: ["Standard Trivia Game", "Advanced Trivia Game"],
-                    name: "game"
-                }// end prompt
-            ]).then(function(response){
-                var rg = response.game;
-                    console.log(rg);
-                    if(rg === "Standard Trivia Game"){
-                        startBasicTrivia();
-                    } else if(rg === "Advanced Trivia Game"){
-                        startAdvancedTrivia();
-                    } else{
-                        console.log("I have no idea how you got here!");
+                front = response.front;
+                console.log("You just submitted this front: \n" + front);
+                inquire.prompt([
+                    {
+                        type: "input",
+                        message: "What is answer to your question?",
+                        name: "back"
                     }
-            });// end then()
-        } else {
-            console.log("Something is not working on my age prompt question!")
-        }//end else if()
-    });// end inquire.prompt(Are you 21?)
+                ]).then(function(input){
+                    var back = input.back;
+                    // console.log("back is " + back);
+                    // console.log("You just submitted this back: \n" + back);
+                    var newCard = new Card(front, back);
+                    questionsArr.push(newCard);
+                    setQuestions();
+                });// end answer inquire.prompt.then()
+            });// end question inquire.prompt.then()
+        }else{
+            console.log("I have no idea how you got here!");
+        }// end else if()
+    }); // end .then()
 }// end gameChoice()
+
+function pickCard(){
+    var questionsRemaining = questionsArr.length;
+    var randomIndex = Math.floor(Math.random() * questionsRemaining);
+    var chosenCard = questionsArr[randomIndex];
+    // console.log(chosenCard);
+    questionsArr.splice(randomIndex, 1);
+    return chosenCard;
+}// end pickCard()
 
 // Sandbox
 
