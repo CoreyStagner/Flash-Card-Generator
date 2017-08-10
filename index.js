@@ -1,63 +1,46 @@
 // Requires
-var fs = require("fs"), obj;
-var inquire = require("inquirer");
-var chalk = require("chalk");
-var colors = require("colors");
-
+var fs = require("fs"); // Allows user to access the file system surrounding the app
+var inquire = require("inquirer"); // Allows the user to interact with the app and have the app see the users input
+var chalk = require("chalk"); // Allows adding color to text in the CLI
+var Card = require("./Card"); // Imports the Card Constructor
 
 // Initial Values
-var questionsArr = [];
-getQuestions();
+var questionsArr = []; // Creates an empty array
+getQuestions(); // Fills Array with the library.json file
+var score = 0; // Declares and set the variable to zero for the first run
+var wrong = 0; // Declares and set the variable to zero for the first run
 
-// Set up Functions
-function Card(front, back) {                     // Constructor for the Card
-    this.front = front;
-    this.back = back;
-    this.recordCard = function(front, back){     // Function the record the card and add it to questionArr
-        data = {
-            front: this.front,
-            back: this.back
-        } //end data{}
-        var newCard = data;
-        questionsArr.push(data);
-        console.log(questionsArr);
-    }//end recordCard()
-}//end Card({})
+// Functions
 
-// var test = new Card("The answer to life?", "42").recordCard();
-// var test = new Card("This is a test", "But you failed").recordCard();
-// setQuestions();
-
-function getQuestions(){                         // Function used to get the questions[] from the library.json file
+function getQuestions(){
+// Function used to get the questions[] from the library.json file
     fs.readFile("library.json", "utf8", fileReader);
-    console.log("getQuestions(): " + questionsArr.length + " rounds");
     // end fs.readFile()
 }//end getQuestions()
 
-function fileReader(err, data) {                 // Function used to read the library.json file and assign it to the questionsArr
+function fileReader(err, data) {
+// Function used to read the library.json file and assign it to the questionsArr
     if (err) {
         console.log(err);
     }
     questionsArr = JSON.parse(data);
-    console.log(questionsArr);
 }//end fileReader()
 
-function setQuestions(){                         // Function used to set the questions[] to the library.json file
+function setQuestions(){
+// Function used to set the questions[] to the library.json file
     fs.writeFile("library.json", JSON.stringify(questionsArr), function(err){
         if(err) console.log(err);
     });//end fs.writeFile()
 }//end setQuestions
 
 function playFlashCards(){
-    console.log("You are studying your flash cards. Now you will ace this test.");
+// function that runs through array asking the questions and hold the score values
+// to inform the user once they are done
     if(questionsArr.length > 0){
-        console.log(questionsArr.length);
-        console.log("Game continues");
-        // console.log(numRounds);
+        console.log("QUESTION: ");
         theCard = pickCard();
-        console.log(theCard.front);
-        console.log(theCard.back);
-        // console.log("Your Question is " + JSON.stringify(theCard, null, 2));
+        // console.log(theCard.front);
+        // console.log(theCard.back);
         inquire.prompt([
             {
                 type: "input",
@@ -65,37 +48,40 @@ function playFlashCards(){
                 name: "answer"
             }
             ]).then(function(response){
-                var guess = String(response.answer);
-                var correct = String(theCard.back);
+                var guess = response.answer;
+                var correct = theCard.back;
                 console.log("You guessed " + guess);
-                console.log("You should have guessed " +theCard.back)
-                if (guess.toLowerCase === correct.toLowerCase){
-                    console.log("Correct");
+                if (guess === correct){
+                    console.log(chalk.green("Correct"));
                     score++;
                 } else {
-                    console.log("Wrong");
+                    console.log(chalk.red(`That was Incorrect
+                  The question was "${theCard.front}"
+            The correct answer was "${theCard.back}"`));
+                    wrong++;
                 }
                 // recursion of function
                 playFlashCards();
             });// end inquire.prompt.then()
     }else{
-        console.log("Game is Over");
-        console.log("Congradulations, out of " + rounds + ", you got " + score + " correct.")
+        console.log("Game is Over! \nYou got " + score + " correct.\nYou missed " + wrong + "!");
     }// end if/else()
 }
 function gameChoice(){
     score = 0;
+    wrong = 0;
     inquire.prompt([
         {
             type:"list",
             message: "Grab a drink, and let's study. What do you want to do?",
-            choices: ["Study Flash Cards", "Create New Cards"],
+            choices: ["Study Flash Cards", "Create New Cards", "Clear All Flash Cards", "Quit school and be a bum!"],
             name: "game"
         }// end prompt()
     ]).then(function(response){
         var rg = response.game;
         console.log(rg);
         if(rg === "Study Flash Cards"){
+            console.log("You are studying your flash cards. Now you will ace this test.");
             playFlashCards();
         } else if(rg === "Create New Cards"){
             console.log("Let's make a new card");
@@ -121,9 +107,15 @@ function gameChoice(){
                     var newCard = new Card(front, back);
                     questionsArr.push(newCard);
                     setQuestions();
+                    gameChoice();
+    
                 });// end answer inquire.prompt.then()
             });// end question inquire.prompt.then()
-        }else{
+        } else if(rg === "Clear All Flash Cards"){
+            clearQuestions();
+        } else if(rg === "Quit school and be a bum!"){
+            console.log(chalk.inverse("That is a personal decision, but I am going to recommend against that!"));
+        } else{
             console.log("I have no idea how you got here!");
         }// end else if()
     }); // end .then()
@@ -138,6 +130,14 @@ function pickCard(){
     return chosenCard;
 }// end pickCard()
 
+function clearQuestions(){
+    fs.writeFile("library.json", "[]", function(err){
+        if(err){
+            console.log("Error: " + err);
+        }//end if();
+    })
+    gameChoice();
+}
 // Sandbox
 
 // setQuestions();
