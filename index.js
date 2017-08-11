@@ -1,3 +1,16 @@
+///////////////////////////////////////////////////////////////////////////////////////////////////
+//
+//      Flash Card Generator
+//
+//      A CLI node application that will allow you to create your own flash cards to be used for 
+//      studying, create trivia questions for your friends, or just to have some fun.
+//
+//      This application was written by:
+//          CS Dev (Corey Stagner)
+//          Copyright © 2017. All Rights Reserved.
+//
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 // Requires
 var fs = require("fs"); // Allows user to access the file system surrounding the app
 var inquire = require("inquirer"); // Allows the user to interact with the app and have the app see the users input
